@@ -7,28 +7,22 @@ env:
   LATEST_STABLE: v1 # For back compat scenario (i.e. save with LATEST_STABLE and restore with VERSION_TO_TEST)
 
 jobs:
-  upload:
+  upload-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        cache-version: [${{ env.VERSION_TO_TEST }}, ${{ env.LATEST_STABLE }}]
-        include:
-        - cache-version: ${{ env.VERSION_TO_TEST }}
-          name: testing
-        - cache-version: ${{ env.LATEST_STABLE }}
-          name: stable
-    name: node-cache upload ${{ matrix.name }} (${{ matrix.os }})
+    name: node-cache upload test (${{ matrix.os }})
     steps:
     - uses: actions/checkout@v1
 
-    - uses: actions/cache@${{ matrix.cache-version }}
+    - uses: actions/cache@${{ env.VERSION_TO_TEST }}
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}-${{ matrix.name }}
+        key: ${{ runner.os }}-node-test-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          ${{ runner.os }}-node-
+          ${{ runner.os }}-node-test-${{ hashFiles('**/package-lock.json') }}
+          ${{ runner.os }}-node-test
     - run: npm install
       working-directory: ./node
     - run: npm run build
@@ -36,19 +30,13 @@ jobs:
     - run: npm test
       working-directory: ./node
 
-  restore:
+  restore-test:
     needs: upload
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        cache-version: [${{ env.VERSION_TO_TEST }}, ${{ LATEST_STABLE }}]
-        include:
-        - cache-version: ${{ env.VERSION_TO_TEST }}
-          name: testing
-        - cache-version: ${{ env.LATEST_STABLE }}
-          name: stable
-    name: node-cache restore (${{ matrix.os }})
+    name: node-cache restore test(${{ matrix.os }})
     steps:
     - uses: actions/checkout@v1
 
@@ -56,7 +44,7 @@ jobs:
       id: cache
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}-${{ matrix.name }}
+        key: ${{ runner.os }}-node-test-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
 
     - name: Fail if cache not found
       if: steps.cache.outputs.cache-hit != 'true'
