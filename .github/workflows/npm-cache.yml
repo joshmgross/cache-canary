@@ -1,0 +1,71 @@
+name: npm-cache
+
+on: push
+
+env:
+  VERSION_TO_TEST: v1
+  LATEST_STABLE: v1 # For back compat scenario (i.e. save with LATEST_STABLE and restore with VERSION_TO_TEST)
+
+jobs:
+  upload:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        cache-version: [${{ env.VERSION_TO_TEST }}, ${{ LATEST_STABLE }}]
+        include:
+        - cache-version: ${{ env.VERSION_TO_TEST }}
+          name: testing
+        - cache-version: ${{ env.LATEST_STABLE }}
+          name: stable
+    name: node-cache upload ${{ matrix.name }} (${{ matrix.os }})
+    steps:
+    - uses: actions/checkout@v1
+
+    - uses: actions/cache@${{ matrix.cache-version }}
+      with:
+        path: node/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}-${{ matrix.name }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          ${{ runner.os }}-node-
+    - run: npm install
+      working-directory: ./node
+    - run: npm run build
+      working-directory: ./node
+    - run: npm test
+      working-directory: ./node
+
+  restore:
+    needs: upload
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        cache-version: [${{ env.VERSION_TO_TEST }}, ${{ LATEST_STABLE }}]
+        include:
+        - cache-version: ${{ env.VERSION_TO_TEST }}
+          name: testing
+        - cache-version: ${{ env.LATEST_STABLE }}
+          name: stable
+    name: node-cache restore (${{ matrix.os }})
+    steps:
+    - uses: actions/checkout@v1
+
+    - uses: actions/cache@${{ env.VERSION_TO_TEST }} # Always want to test restore with test version
+      id: cache
+      with:
+        path: node/node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}-${{ matrix.name }}
+
+    - name: Fail if cache not found
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        echo "Cache not found, upload failed"
+        exit 1
+    - run: npm install
+      working-directory: ./node
+    - run: npm run build
+      working-directory: ./node
+    - run: npm test
+      working-directory: ./node

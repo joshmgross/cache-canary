@@ -1,0 +1,16 @@
+{
+  "name": "canary-node",
+  "version": "1.0.0",
+  "description": "Canary workflow for node",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "node index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^12.12.5",
+    "typescript": "^3.6.4"
+  }
+}
