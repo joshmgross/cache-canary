@@ -3,7 +3,7 @@ name: npm-cache
 on: push
 
 jobs:
-  upload-test:
+  upload:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
