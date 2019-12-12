@@ -2,27 +2,36 @@ name: npm-cache
 
 on: push
 
-env:
-  VERSION_TO_TEST: v1
-  LATEST_STABLE: v1 # For back compat scenario (i.e. save with LATEST_STABLE and restore with VERSION_TO_TEST)
-
 jobs:
   upload-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    name: node-cache upload test (${{ matrix.os }})
+        cache: [test, stable]
+    name: node-cache upload ${{ matrix.cache }} (${{ matrix.os }})
     steps:
     - uses: actions/checkout@v1
 
-    - uses: actions/cache@${{ env.VERSION_TO_TEST }}
+    - name: Upload Stable Cache
+      uses: actions/cache@v1
+      if: matrix.cache == 'stable'
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-test-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+        key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-node-test-${{ hashFiles('**/package-lock.json') }}
-          ${{ runner.os }}-node-test
+          ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}
+          ${{ runner.os }}-node-${{ matrix.cache }}
+
+    - name: Upload Test Cache
+      uses: actions/cache@v1 # Replace this version with version to test
+      if: matrix.cache == 'test'
+      with:
+        path: node/node_modules
+        key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}
+          ${{ runner.os }}-node-${{ matrix.cache }}
     - run: npm install
       working-directory: ./node
     - run: npm run build
@@ -30,21 +39,22 @@ jobs:
     - run: npm test
       working-directory: ./node
 
-  restore-test:
+  restore:
     needs: upload
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    name: node-cache restore test(${{ matrix.os }})
+        cache: [test, stable]
+    name: node-cache restore ${{ matrix.cache }} (${{ matrix.os }})
     steps:
     - uses: actions/checkout@v1
 
-    - uses: actions/cache@${{ env.VERSION_TO_TEST }} # Always want to test restore with test version
+    - uses: actions/cache@v1 # Always want to test restore with test version
       id: cache
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-test-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+        key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
 
     - name: Fail if cache not found
       if: steps.cache.outputs.cache-hit != 'true'
