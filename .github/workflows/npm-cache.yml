@@ -24,7 +24,7 @@ jobs:
           ${{ runner.os }}-node-${{ matrix.cache }}
 
     - name: Upload Test Cache
-      uses: actions/cache@joshmgross/windows-bsd-tar-release # Replace this version with version to test
+      uses: actions/cache@releases/v1 # Replace this version with version to test
       if: matrix.cache == 'test'
       with:
         path: node/node_modules
@@ -50,7 +50,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - uses: actions/cache@joshmgross/windows-bsd-tar-release # Always want to test restore with test version
+    - uses: actions/cache@releases/v1 # Always want to test restore with test version
       id: cache
       with:
         path: node/node_modules
