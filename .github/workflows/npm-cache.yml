@@ -18,20 +18,20 @@ jobs:
       if: matrix.cache == 'stable'
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+        key: ${{ runner.os }}-node++-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}
-          ${{ runner.os }}-node-${{ matrix.cache }}
+          ${{ runner.os }}-node++-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}
+          ${{ runner.os }}-node++-${{ matrix.cache }}
 
     - name: Upload Test Cache
       uses: actions/cache@v1.1.0 # Replace this version with version to test
       if: matrix.cache == 'test'
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+        key: ${{ runner.os }}-node++-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
         restore-keys: |
-          ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}
-          ${{ runner.os }}-node-${{ matrix.cache }}
+          ${{ runner.os }}-node++-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}
+          ${{ runner.os }}-node++-${{ matrix.cache }}
     - run: npm install
       working-directory: ./node
     - run: npm run build
@@ -54,7 +54,7 @@ jobs:
       id: cache
       with:
         path: node/node_modules
-        key: ${{ runner.os }}-node-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
+        key: ${{ runner.os }}-node++-${{ matrix.cache }}-${{ hashFiles('**/package-lock.json') }}-${{ github.sha }}
 
     - name: Fail if cache not found
       if: steps.cache.outputs.cache-hit != 'true'
