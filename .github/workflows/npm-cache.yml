@@ -24,7 +24,7 @@ jobs:
           ${{ runner.os }}-node++-${{ matrix.cache }}
 
     - name: Upload Test Cache
-      uses: actions/cache@releases/v1 # Replace this version with version to test
+      uses: actions/cache@v1.1.1 # Replace this version with version to test
       if: matrix.cache == 'test'
       with:
         path: node/node_modules
@@ -48,7 +48,7 @@ jobs:
         cache: [test, stable]
     name: node-cache restore ${{ matrix.cache }} (${{ matrix.os }})
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v1.1.1
 
     - uses: actions/cache@releases/v1 # Always want to test restore with test version
       id: cache
