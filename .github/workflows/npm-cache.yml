@@ -11,7 +11,7 @@ jobs:
         cache: [test, stable]
     name: node-cache upload ${{ matrix.cache }} (${{ matrix.os }})
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - name: Upload Stable Cache
       uses: actions/cache@v1
@@ -48,9 +48,9 @@ jobs:
         cache: [test, stable]
     name: node-cache restore ${{ matrix.cache }} (${{ matrix.os }})
     steps:
-    - uses: actions/checkout@v1.1.1
+    - uses: actions/checkout@v2
 
-    - uses: actions/cache@releases/v1 # Always want to test restore with test version
+    - uses: actions/cache@v1.1.1 # Always want to test restore with test version
       id: cache
       with:
         path: node/node_modules
