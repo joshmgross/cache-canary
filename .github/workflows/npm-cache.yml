@@ -1,6 +1,6 @@
 name: npm-cache
 
-on: push
+on: [push, workflow_dispatch]
 
 jobs:
   upload:
@@ -11,10 +11,10 @@ jobs:
         cache: [test, stable]
     name: node-cache upload ${{ matrix.cache }} (${{ matrix.os }})
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Upload Stable Cache
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       if: matrix.cache == 'stable'
       with:
         path: node/node_modules
@@ -24,7 +24,7 @@ jobs:
           ${{ runner.os }}-node++-${{ matrix.cache }}
 
     - name: Upload Test Cache
-      uses: actions/cache@v1.1.1 # Replace this version with version to test
+      uses: actions/cache@v3 # Replace this version with version to test
       if: matrix.cache == 'test'
       with:
         path: node/node_modules
@@ -48,9 +48,9 @@ jobs:
         cache: [test, stable]
     name: node-cache restore ${{ matrix.cache }} (${{ matrix.os }})
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
-    - uses: actions/cache@v1.1.1 # Always want to test restore with test version
+    - uses: actions/cache@v3 # Always want to test restore with test version
       id: cache
       with:
         path: node/node_modules
